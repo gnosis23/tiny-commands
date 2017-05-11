@@ -1,0 +1,10 @@
+div.__tiny-commander {
+  position: fixed;
+  width: 520px;
+  height: 80px;
+  top: 20%;
+  left: calc(50% - 520px / 2);
+  background: #fff;
+  border: 1px solid #e3e4e5;
+  box-shadow: 2px 2px 5px #e3e4e5;
+}
