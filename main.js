@@ -15,10 +15,19 @@
 
   const response = await window.fetch(findPath('/view.html'), myInit);
   const template = await response.text();
-  const node = htmlToElement(template);
+  const root = htmlToElement(template);
 
-  document.body.appendChild(node);
+  document.body.appendChild(root);
 
+  // key bindings
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "F2") {
+      root.classList.toggle('__tcmd_hide');
+      console.log(event);
+    }
+  });
+
+  // implementations
   function findPath(url) {
     return (chrome && chrome.extension) ? chrome.extension.getURL(url) : url;    
   }
