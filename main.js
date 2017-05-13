@@ -23,7 +23,8 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "F2") {
       root.classList.toggle('__tcmd_hide');
-      console.log(event);
+      const input = document.getElementById('__tcmd-input');
+      input.focus();
     }
   });
 
