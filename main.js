@@ -1,6 +1,52 @@
 (async function () {
   'use strict';
-  // start
+  // ========================================
+  // Global variables
+  // ========================================
+  let tabs = [];
+  const rootElement = await getRoot();
+
+  // ========================================
+  // setup
+  // ========================================
+  document.body.appendChild(rootElement);
+  getTabs();
+  bindKeysAndRender();
+
+  // ========================================
+  // implementations
+  // ========================================
+  async function getRoot() {
+    var fetchOptions = {
+      method: 'GET',
+      cache: 'default'
+    };
+    const response = await window.fetch(findPath('/view.html'), fetchOptions);
+    const template = await response.text();
+    return htmlToElement(template);
+  }
+
+  function bindKeysAndRender() {
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "F2") {
+        if (rootElement.classList.contains('__tcmd_hide')) {
+          const input = document.getElementById('__tcmd-input');
+          input.focus();
+
+          render(tabs);
+          bindClicks();
+        }
+
+        rootElement.classList.toggle('__tcmd_hide');
+      }
+    });
+  }
+
+  function getTabs() {
+    chrome.runtime.sendMessage({ id: "tabs" }, function (response) {      
+      tabs = (response.tabs);
+    });
+  }
 
   function htmlToElement(html) {
     var template = document.createElement('template');
@@ -8,28 +54,31 @@
     return template.content.firstChild;
   }
 
-  var myInit = {
-    method: 'GET',
-    cache: 'default'
-  };
-
-  const response = await window.fetch(findPath('/view.html'), myInit);
-  const template = await response.text();
-  const root = htmlToElement(template);
-
-  document.body.appendChild(root);
-
-  // key bindings
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "F2") {
-      root.classList.toggle('__tcmd_hide');
-      const input = document.getElementById('__tcmd-input');
-      input.focus();
-    }
-  });
-
-  // implementations
   function findPath(url) {
-    return (chrome && chrome.extension) ? chrome.extension.getURL(url) : url;    
+    return (chrome && chrome.extension) ? chrome.extension.getURL(url) : url;
+  }
+
+  function render(currentTabs) {
+    let list = "";
+
+    list += `<p>标签</p>`;
+
+    [].forEach.call(currentTabs, function (tab) {
+      list +=
+        `<a class="__tcmd-cmd __tcmd-tab">
+          <span class="__tcmd-cmd-name">${tab.title}</span>        
+        </a>`
+    })
+
+    const cmdList = document.getElementById('__tcmd-list');
+    cmdList.innerHTML = list;
+  }
+
+  function bindClicks() {
+    document.querySelectorAll('.__tcmd-tab').forEach(function (elem) {
+      elem.addEventListener('click', () => {
+        alert("hehe");
+      })
+    })
   }
 })();

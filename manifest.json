@@ -14,6 +14,9 @@
     "default_icon": "icon.png"
   },
   "web_accessible_resources": ["view.html"],
+  "background": {
+    "scripts": ["background.js"]
+  },
   "content_scripts": [
     {
       "matches": [
