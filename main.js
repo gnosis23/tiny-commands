@@ -1,9 +1,21 @@
+(async function () {
+  'use strict';
+  // start
 
-'use strict';
+  function htmlToElement(html) {
+    var template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content.firstChild;
+  }
 
+  var myInit = {
+    method: 'GET',
+    cache: 'default'
+  };
 
-// start
-const cmd = document.createElement("div");
-cmd.className += ("__tiny-commander hide");
-document.body.appendChild(cmd);
+  const response = await window.fetch(chrome.extension.getURL('/view.html'), myInit);
+  const template = await response.text();
+  const node = htmlToElement(template);
 
+  document.body.appendChild(node);
+})();

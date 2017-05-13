@@ -1,7 +1,8 @@
 div.__tiny-commander {
   position: fixed;
-  width: 520px;
-  height: 80px;
+  width: 503px;
+  height: 39px;
+  padding: 5px 9px 0 16px;
   top: 20%;
   left: calc(50% - 520px / 2);
   background: #fff;

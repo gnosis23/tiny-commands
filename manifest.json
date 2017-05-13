@@ -13,6 +13,7 @@
     "default_title": "HH",
     "default_icon": "icon.png"
   },
+  "web_accessible_resources": ["view.html"],
   "content_scripts": [
     {
       "matches": [
