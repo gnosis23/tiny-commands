@@ -13,9 +13,13 @@
     cache: 'default'
   };
 
-  const response = await window.fetch(chrome.extension.getURL('/view.html'), myInit);
+  const response = await window.fetch(findPath('/view.html'), myInit);
   const template = await response.text();
   const node = htmlToElement(template);
 
   document.body.appendChild(node);
+
+  function findPath(url) {
+    return (chrome && chrome.extension) ? chrome.extension.getURL(url) : url;    
+  }
 })();
