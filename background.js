@@ -4,7 +4,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     case "tabs":
       listTabs(sendResponse); break;
     case "gotoTab":
-      gotoTab(request.tab); break;
+      gotoTab(sender.tab); break;
+    case "newWindow":
+      createWindow(); break;
+    case "closeWindow":
+      closeWindow(sender.tab); break;
+    case "fullScreen":
+      fullScreen(sender.tab); break;
   }
   return true;
 });
@@ -17,4 +23,16 @@ function listTabs(dispatcher) {
 
 function gotoTab(tab) {
   chrome.tabs.update(tab.id, {active: true});
+}
+
+function createWindow() {
+  chrome.windows.create();
+}
+
+function closeWindow(tab) {
+  chrome.windows.remove(tab.windowId);
+}
+
+function fullScreen(tab) {
+  chrome.windows.update(tab.windowId, {state: "fullscreen"});
 }

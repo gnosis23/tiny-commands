@@ -34,7 +34,6 @@
           input.focus();
 
           render(tabs);
-          bindClicks(tabs);
         }
 
         rootElement.classList.toggle('__tcmd_hide');
@@ -60,7 +59,26 @@
 
   function render(currentTabs) {
     let list = "";
+    const doRender = [
+      tabRender(tabs),
+      commandRender(tabs)
+    ];
 
+    doRender.forEach((result) => {
+      list += result.template;
+    });
+    const cmdList = document.getElementById('__tcmd-list');
+    cmdList.innerHTML = list;
+
+    doRender.forEach((result) => {
+      document.querySelectorAll(result.selector).forEach((elem, index) => {
+        result.listener(elem, index);
+      })
+    })
+  }
+
+  function tabRender(currentTabs) {
+    let list = "";
     list += `<p>标签</p>`;
 
     [].forEach.call(currentTabs, function (tab) {
@@ -68,17 +86,49 @@
         `<a class="__tcmd-cmd __tcmd-tab">
           <span class="__tcmd-cmd-name">${tab.title}</span>        
         </a>`
-    })
+    });
 
-    const cmdList = document.getElementById('__tcmd-list');
-    cmdList.innerHTML = list;
+    function clickListener(elem, index) {
+      elem.addEventListener('click', () => {
+        chrome.runtime.sendMessage({ id: "gotoTab" });
+      });
+    }
+
+    return {
+      template: list,
+      selector: ".__tcmd-tab",
+      listener: clickListener
+    }
   }
 
-  function bindClicks(currentTabs) {
-    document.querySelectorAll('.__tcmd-tab').forEach(function (elem, index) {
+  function commandRender(currentTabs) {
+    let list = "";
+    const selector = '__tcmd-command';
+    list += '<p>命令</p>';
+
+    const commandList = [
+      {name: '新建窗口', id: 'newWindow'},
+      {name: '关闭窗口', id: 'closeWindow'},
+      {name: '全屏模式', id: 'fullScreen'}
+    ];
+
+    commandList.forEach((cmd, index) => {
+      list +=
+        `<a class="__tcmd-cmd ${selector}">
+          <span class="__tcmd-cmd-name">${commandList[index].name}</span>        
+        </a>`;
+    });
+
+    function clickListener(elem, index) {
       elem.addEventListener('click', () => {
-        chrome.runtime.sendMessage({ id: "gotoTab", tab: currentTabs[index] });
-      })
-    })
+        chrome.runtime.sendMessage({ id: commandList[index].id });
+      });
+    }
+
+    return {
+      template: list,
+      selector: `.${selector}`,
+      listener: clickListener
+    }
   }
 })();
