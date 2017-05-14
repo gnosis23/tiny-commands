@@ -26,19 +26,23 @@
     return htmlToElement(template);
   }
 
-  function bindKeysAndRender() {
+  function bindKeysAndRender() {    
+    const input = document.getElementById('__tcmd-input');
+
     document.addEventListener("keydown", (event) => {
       if (event.key === "F2") {
-        if (rootElement.classList.contains('__tcmd_hide')) {
-          const input = document.getElementById('__tcmd-input');
-          input.focus();
-
-          render(tabs);
-        }
-
+        input.value = "";
         rootElement.classList.toggle('__tcmd_hide');
+        if (!rootElement.classList.contains('__tcmd_hide')) {          
+          render(tabs, "");          
+          input.focus();          
+        }        
       }
     });
+
+    input.addEventListener('keyup', (event) => {      
+      render(tabs, input.value);
+    })
   }
 
   function getTabs() {
@@ -57,12 +61,16 @@
     return (chrome && chrome.extension) ? chrome.extension.getURL(url) : url;
   }
 
-  function render(currentTabs) {
+  function strContains(word, keywords) {
+    return word.toLowerCase().indexOf(keywords.toLowerCase()) > -1;
+  }
+
+  function render(currentTabs, keywords) {
     let list = "";
     const doRender = [
-      tabRender(tabs),
-      commandRender(tabs)
-    ];
+      tabRender(tabs, keywords),
+      commandRender(tabs, keywords)
+    ].filter(x => x !== null);
 
     doRender.forEach((result) => {
       list += result.template;
@@ -77,7 +85,12 @@
     })
   }
 
-  function tabRender(currentTabs) {
+  function tabRender(currentTabs, keywords) {
+    if (keywords) {
+      currentTabs = currentTabs.filter( (tab) => strContains(tab.title, keywords));
+      if (currentTabs.length === 0) return null;
+    }
+
     let list = "";
     list += `<p>标签</p>`;
 
@@ -101,16 +114,21 @@
     }
   }
 
-  function commandRender(currentTabs) {
-    let list = "";
-    const selector = '__tcmd-command';
-    list += '<p>命令</p>';
-
-    const commandList = [
+  function commandRender(currentTabs, keywords) {
+    let commandList = [
       {name: 'Open a new window', id: 'newWindow', key: 'Ctrl + n'},
       {name: 'Close the current window', id: 'closeWindow', key: 'Alt + F4'},
       {name: 'Turn full-screen mode on or off', id: 'fullScreen', key: 'F11'}
     ];
+
+    if (keywords) {
+      commandList = commandList.filter( x => strContains(x.name, keywords));
+      if (commandList.length === 0) return null;
+    }
+
+    let list = "";
+    const selector = '__tcmd-command';
+    list += '<p>命令</p>';
 
     commandList.forEach((cmd, index) => {
       list +=
