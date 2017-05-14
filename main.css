@@ -1,6 +1,14 @@
 .__tcmd * {
   box-sizing: border-box;
   text-align: left;
+  outline: none;
+  color: #333;
+}
+
+.__tcmd input {
+  border: 0!important;
+  outline: none!important;
+  box-shadow: none!important;
 }
 
 div.__tcmd {

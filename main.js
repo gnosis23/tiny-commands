@@ -34,7 +34,7 @@
           input.focus();
 
           render(tabs);
-          bindClicks();
+          bindClicks(tabs);
         }
 
         rootElement.classList.toggle('__tcmd_hide');
@@ -74,10 +74,10 @@
     cmdList.innerHTML = list;
   }
 
-  function bindClicks() {
-    document.querySelectorAll('.__tcmd-tab').forEach(function (elem) {
+  function bindClicks(currentTabs) {
+    document.querySelectorAll('.__tcmd-tab').forEach(function (elem, index) {
       elem.addEventListener('click', () => {
-        alert("hehe");
+        chrome.runtime.sendMessage({ id: "gotoTab", tab: currentTabs[index] });
       })
     })
   }
