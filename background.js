@@ -4,7 +4,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     case "tabs":
       listTabs(sendResponse); break;
     case "gotoTab":
-      gotoTab(sender.tab); break;
+      gotoTab(request.tab); break;
     case "newWindow":
       createWindow(); break;
     case "closeWindow":

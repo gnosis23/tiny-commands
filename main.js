@@ -90,7 +90,7 @@
 
     function clickListener(elem, index) {
       elem.addEventListener('click', () => {
-        chrome.runtime.sendMessage({ id: "gotoTab" });
+        chrome.runtime.sendMessage({ id: "gotoTab", tab: currentTabs[index] });
       });
     }
 
@@ -107,15 +107,16 @@
     list += '<p>命令</p>';
 
     const commandList = [
-      {name: '新建窗口', id: 'newWindow'},
-      {name: '关闭窗口', id: 'closeWindow'},
-      {name: '全屏模式', id: 'fullScreen'}
+      {name: 'Open a new window', id: 'newWindow', key: 'Ctrl + n'},
+      {name: 'Close the current window', id: 'closeWindow', key: 'Alt + F4'},
+      {name: 'Turn full-screen mode on or off', id: 'fullScreen', key: 'F11'}
     ];
 
     commandList.forEach((cmd, index) => {
       list +=
         `<a class="__tcmd-cmd ${selector}">
-          <span class="__tcmd-cmd-name">${commandList[index].name}</span>        
+          <span class="__tcmd-cmd-name">${commandList[index].name}</span>
+          <span class="__tcmd-cmd-value">${commandList[index].key}</span>      
         </a>`;
     });
 
