@@ -80,10 +80,22 @@ div.__tcmd-recommend {
   background-color: #0098df;
 }
 
-.__tcmd-name {
+.__tcmd-cmd-name {
+  white-space: nowrap;
+  width: 70%;
+  overflow: hidden;
+  display: inline-block;
+  text-overflow: ellipsis;
+}
 
+.__tcmd_selected .__tcmd-cmd-name, .__tcmd-cmd:hover .__tcmd-cmd-name {
+  color: white;
 }
 
 .__tcmd-cmd-value {
   float: right;
+}
+
+.__tcmd_selected .__tcmd-cmd-value, .__tcmd-cmd:hover .__tcmd-cmd-value {
+  color: white;
 }

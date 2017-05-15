@@ -100,9 +100,17 @@
 
     input.addEventListener('keyup', (event) => {      
       if (event.key === "F2") return;
-      commandList = setupCommandList(tabs, input.value);
+      else if (event.key === "ArrowUp") {
+        commandList.selectPrev();
+      }
+      else if (event.key === "ArrowDown") {
+        commandList.selectNext();
+      }
+      else {
+        commandList = setupCommandList(tabs, input.value);        
+      }
       render(commandList, tabs, input.value);
-    })
+    });
   }
 
   function getTabs() {
