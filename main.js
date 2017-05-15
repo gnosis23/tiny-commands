@@ -1,10 +1,48 @@
 (async function () {
   'use strict';
   // ========================================
+  // Type declarations
+  // ========================================
+  class Command {
+    constructor(name, value, type) {
+      this.name = name;
+      this.value = value;
+      this.type = type;
+      this.id = 0;
+    }
+  };
+  class CommandList {
+    constructor() {
+      this.counter = 0;
+      this.commands = [];
+      this.ptr = 0;
+    }
+    type(name) {
+      return this.commands.filter(x => x.type === name);
+    }
+    add(command) {
+      command.id = this.counter++;
+      this.commands.push(command);
+    }
+    selectNext() {
+      if (this.ptr + 1 < this.counter) this.ptr = this.ptr + 1;
+    }
+    selectPrev() {
+      if (this.ptr > 0) this.ptr = this.ptr - 1;
+    }
+  }
+
+  // ========================================
   // Global variables
   // ========================================
+  const KEY_LIST = [
+    { name: 'Open a new window', id: 'newWindow', key: 'Ctrl + n' },
+    { name: 'Close the current window', id: 'closeWindow', key: 'Alt + F4' },
+    { name: 'Turn full-screen mode on or off', id: 'fullScreen', key: 'F11' }
+  ];
   let tabs = [];
   const rootElement = await getRoot();
+  let commandList = null;
 
   // ========================================
   // setup
@@ -16,6 +54,25 @@
   // ========================================
   // implementations
   // ========================================
+  function setupCommandList(currentTabs, keywords) {
+    if (keywords) {
+      currentTabs = currentTabs.filter((tab) => strContains(tab.title, keywords));      
+    }
+
+    const list = new CommandList();
+      
+    [].forEach.call(currentTabs, function (tab) {
+      list.add(new Command(tab.title, "", "tab"))
+    });
+
+    KEY_LIST.filter(x => strContains(x.name, keywords)).forEach((key) => {
+      list.add(new Command(key.name, key.key, "key"));
+    });
+
+    console.log(list);
+    return list;
+  }
+
   async function getRoot() {
     var fetchOptions = {
       method: 'GET',
@@ -33,15 +90,18 @@
       if (event.key === "F2") {
         input.value = "";
         rootElement.classList.toggle('__tcmd_hide');
-        if (!rootElement.classList.contains('__tcmd_hide')) {          
-          render(tabs, "");          
+        if (!rootElement.classList.contains('__tcmd_hide')) {     
+          commandList = setupCommandList(tabs, "");     
+          render(commandList, tabs, "");          
           input.focus();          
         }        
       }
     });
 
     input.addEventListener('keyup', (event) => {      
-      render(tabs, input.value);
+      if (event.key === "F2") return;
+      commandList = setupCommandList(tabs, input.value);
+      render(commandList, tabs, input.value);
     })
   }
 
@@ -65,11 +125,11 @@
     return word.toLowerCase().indexOf(keywords.toLowerCase()) > -1;
   }
 
-  function render(currentTabs, keywords) {
+  function render(commandList, currentTabs, keywords) {
     let list = "";
     const doRender = [
-      tabRender(tabs, keywords),
-      commandRender(tabs, keywords)
+      tabRender(commandList.type("tab"), commandList.ptr, tabs),
+      keyRender(commandList.type("key"), commandList.ptr)
     ].filter(x => x !== null);
 
     doRender.forEach((result) => {
@@ -85,19 +145,18 @@
     })
   }
 
-  function tabRender(currentTabs, keywords) {
-    if (keywords) {
-      currentTabs = currentTabs.filter( (tab) => strContains(tab.title, keywords));
-      if (currentTabs.length === 0) return null;
+  function tabRender(commandList, ptr, currentTabs) {
+    if (commandList.length === 0) {
+      return null;
     }
 
     let list = "";
     list += `<p>标签</p>`;
 
-    [].forEach.call(currentTabs, function (tab) {
+    [].forEach.call(commandList, function (tab) {
       list +=
-        `<a class="__tcmd-cmd __tcmd-tab">
-          <span class="__tcmd-cmd-name">${tab.title}</span>        
+        `<a class="__tcmd-cmd __tcmd-tab ${tab.id === ptr ? '__tcmd_selected' : '' }">
+          <span class="__tcmd-cmd-name">${tab.name}</span>        
         </a>`
     });
 
@@ -114,16 +173,9 @@
     }
   }
 
-  function commandRender(currentTabs, keywords) {
-    let commandList = [
-      {name: 'Open a new window', id: 'newWindow', key: 'Ctrl + n'},
-      {name: 'Close the current window', id: 'closeWindow', key: 'Alt + F4'},
-      {name: 'Turn full-screen mode on or off', id: 'fullScreen', key: 'F11'}
-    ];
-
-    if (keywords) {
-      commandList = commandList.filter( x => strContains(x.name, keywords));
-      if (commandList.length === 0) return null;
+  function keyRender(commandList, ptr) {
+    if (commandList.length === 0) {
+      return null;
     }
 
     let list = "";
@@ -132,9 +184,9 @@
 
     commandList.forEach((cmd, index) => {
       list +=
-        `<a class="__tcmd-cmd ${selector}">
+        `<a class="__tcmd-cmd ${selector} ${cmd.id === ptr ? '__tcmd_selected' : '' }">
           <span class="__tcmd-cmd-name">${commandList[index].name}</span>
-          <span class="__tcmd-cmd-value">${commandList[index].key}</span>      
+          <span class="__tcmd-cmd-value">${commandList[index].value}</span>      
         </a>`;
     });
 

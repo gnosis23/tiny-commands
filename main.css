@@ -75,7 +75,7 @@ div.__tcmd-recommend {
   font-size: 14px;
 }
 
-.__tcmd-cmd:hover {
+.__tcmd-cmd:hover, .__tcmd_selected {
   color: #fff;
   background-color: #0098df;
 }
