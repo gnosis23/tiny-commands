@@ -88,6 +88,7 @@
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "F2") {
+        getTabs();
         input.value = "";
         rootElement.classList.toggle('__tcmd_hide');
         if (!rootElement.classList.contains('__tcmd_hide')) {     
