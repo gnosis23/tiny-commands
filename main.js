@@ -68,8 +68,7 @@
     KEY_LIST.filter(x => strContains(x.name, keywords)).forEach((key) => {
       list.add(new Command(key.name, key.key, "key"));
     });
-
-    console.log(list);
+    
     return list;
   }
 
@@ -95,6 +94,7 @@
           commandList = setupCommandList(tabs, "");     
           render(commandList, tabs, "");          
           input.focus();          
+          scrollToTop();
         }        
       }
     });
@@ -102,15 +102,16 @@
     input.addEventListener('keyup', (event) => {      
       if (event.key === "F2") return;
       else if (event.key === "ArrowUp") {
-        commandList.selectPrev();
+        commandList.selectPrev();        
       }
       else if (event.key === "ArrowDown") {
-        commandList.selectNext();
+        commandList.selectNext();        
       }
       else {
         commandList = setupCommandList(tabs, input.value);        
       }
       render(commandList, tabs, input.value);
+      scrollIfNeed();
     });
   }
 
@@ -132,6 +133,23 @@
 
   function strContains(word, keywords) {
     return word.toLowerCase().indexOf(keywords.toLowerCase()) > -1;
+  }
+
+  function scrollToTop() {
+    document.getElementById('__tcmd-list').scrollTop = 0;
+  }
+
+  function scrollIfNeed() {
+    const parentElement = document.getElementById('__tcmd-list');
+    const selectedElement = document.querySelector(".__tcmd_selected");
+    if (!selectedElement) return;
+
+    if (selectedElement.offsetTop < parentElement.scrollTop) {
+      selectedElement.scrollIntoView(true);
+    }
+    if (selectedElement.offsetTop - 236 > parentElement.scrollTop) {
+      selectedElement.scrollIntoView(false);
+    }
   }
 
   function render(commandList, currentTabs, keywords) {
