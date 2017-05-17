@@ -45,6 +45,7 @@
     { name: 'Turn full-screen mode on or off', id: 'fullScreen', key: 'F11' }
   ];
   let tabs = [];
+  let bookmarks = [];
   const rootElement = await getRoot();
   let commandList = null;
 
@@ -53,6 +54,7 @@
   // ========================================
   document.body.appendChild(rootElement);
   getTabs();
+  getBookmarks();
   bindKeysAndRender();
 
   // ========================================
@@ -80,6 +82,10 @@
 
   function strContains(word, keywords) {
     return word.toLowerCase().indexOf(keywords.toLowerCase()) > -1;
+  }
+
+  function bookmarkContains(bookmark, keywords) {
+    return strContains(bookmark.title, keywords) || strContains(decodeURI(bookmark.url), keywords);
   }
 
   function hideCommander() {
@@ -110,6 +116,14 @@
       list.add(new Command(key.name, key.key, "key", handler));
     });
     
+    bookmarks.filter(x => bookmarkContains(x, keywords)).slice(0, 10).forEach((bookmark) => {
+      const handler = () => {
+        chrome.runtime.sendMessage({ id: "openBookmark", url: bookmark.url });
+      }
+      list.add(new Command(bookmark.title, bookmark.url, "bookmark", handler));
+    });
+    console.log(bookmarks);
+
     return list;
   }
 
@@ -157,6 +171,11 @@
     });
   }
 
+  function getBookmarks() {
+    chrome.runtime.sendMessage({ id: "bookmarks" }, function (response) {      
+      bookmarks = (response.bookmarks);
+    });
+  }
 
   function scrollToTop() {
     document.getElementById('__tcmd-list').scrollTop = 0;
@@ -179,7 +198,8 @@
     let list = "";
     const doRender = [
       tabRender(commandList.type("tab"), commandList.ptr, tabs),
-      keyRender(commandList.type("key"), commandList.ptr)
+      keyRender(commandList.type("key"), commandList.ptr),
+      bookmarkRender(commandList.type("bookmark"), commandList.ptr)
     ].filter(x => x !== null);
 
     doRender.forEach((result) => {
@@ -243,6 +263,34 @@
     function clickListener(elem, index) {
       elem.addEventListener('click', () => {
         chrome.runtime.sendMessage({ id: commandList[index].id });
+      });
+    }
+
+    return {
+      template: list,
+      selector: `.${selector}`,
+      listener: clickListener
+    }
+  }
+
+  function bookmarkRender(commandList, ptr) {
+    if (commandList.length === 0) return null;
+
+    let list = "";
+    const selector = '__tcmd-bookmark';
+    list += `<p>书签</p>`;
+
+    commandList.forEach((bookmark, index) => {
+      list += 
+        `<a class="__tcmd-cmd ${selector} ${bookmark.id === ptr ? '__tcmd_selected' : '' }">
+          <span class="__tcmd-cmd-name">${commandList[index].name}</span>
+          <span class="__tcmd-cmd-value">${commandList[index].value}</span>      
+        </a>`;
+    });
+
+    function clickListener(elem, index) {
+      elem.addEventListener('click', () => {
+        chrome.runtime.sendMessage({ id: 'openBookmark', url: commandList[index].value})
       });
     }
 

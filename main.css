@@ -84,7 +84,7 @@ div.__tcmd-recommend {
 
 .__tcmd-cmd-name {
   white-space: nowrap;
-  width: 70%;
+  width: 50%;
   overflow: hidden;
   display: inline-block;
   text-overflow: ellipsis;
@@ -96,6 +96,12 @@ div.__tcmd-recommend {
 
 .__tcmd-cmd-value {
   float: right;
+  display: block;
+  white-space: nowrap;
+  text-overflow: hidden;
+  overflow: hidden;
+  width: 40%;
+  text-align: right;
 }
 
 .__tcmd_selected .__tcmd-cmd-value, .__tcmd-cmd:hover .__tcmd-cmd-value {

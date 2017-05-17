@@ -3,6 +3,10 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   switch (request.id) {
     case "tabs":
       listTabs(sendResponse); break;
+    case "bookmarks":
+      listBookmarks(sendResponse); break;
+    case "openBookmark":
+      openBookmark(request.url);
     case "gotoTab":
       gotoTab(request.tab); break;
     case "newWindow":
@@ -19,6 +23,28 @@ function listTabs(dispatcher) {
   chrome.tabs.query({ currentWindow: true }, function (tabs) {
     dispatcher({ tabs: tabs });
   });
+}
+
+function listBookmarks(dispatcher) {
+  chrome.bookmarks.getTree(function (treeNodes) {
+    dispatcher({ bookmarks: treeToList(treeNodes[0]) });
+  })
+}
+
+function treeToList(tree) {
+  let result = [];
+  if (tree.url) {
+    result.push({title: tree.title, url: tree.url});
+  } else if (tree.children) {
+    tree.children.forEach(function(node) {
+      result = result.concat(treeToList(node));
+    })
+  }
+  return result;
+}
+
+function openBookmark(url) {
+  chrome.tabs.create({url: url, active: true})
 }
 
 function gotoTab(tab) {
