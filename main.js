@@ -56,6 +56,37 @@
   bindKeysAndRender();
 
   // ========================================
+  // helper functions
+  // ========================================
+  async function getRoot() {
+    var fetchOptions = {
+      method: 'GET',
+      cache: 'default'
+    };
+    const response = await window.fetch(findPath('/view.html'), fetchOptions);
+    const template = await response.text();
+    return htmlToElement(template);
+  }
+
+  function htmlToElement(html) {
+    var template = document.createElement('template');
+    template.innerHTML = html;
+    return template.content.firstChild;
+  }
+
+  function findPath(url) {
+    return (chrome && chrome.extension) ? chrome.extension.getURL(url) : url;
+  }
+
+  function strContains(word, keywords) {
+    return word.toLowerCase().indexOf(keywords.toLowerCase()) > -1;
+  }
+
+  function hideCommander() {
+    rootElement.classList.toggle('__tcmd_hide');
+  }
+
+  // ========================================
   // implementations
   // ========================================
   function setupCommandList(currentTabs, keywords) {
@@ -82,16 +113,6 @@
     return list;
   }
 
-  async function getRoot() {
-    var fetchOptions = {
-      method: 'GET',
-      cache: 'default'
-    };
-    const response = await window.fetch(findPath('/view.html'), fetchOptions);
-    const template = await response.text();
-    return htmlToElement(template);
-  }
-
   function bindKeysAndRender() {    
     const input = document.getElementById('__tcmd-input');
 
@@ -114,6 +135,7 @@
       else if (event.key === "Enter") {
         const cmd = commandList.selected();
         cmd.handler();
+        hideCommander();
       }
       else if (event.key === "ArrowUp") {
         commandList.selectPrev();        
@@ -135,19 +157,6 @@
     });
   }
 
-  function htmlToElement(html) {
-    var template = document.createElement('template');
-    template.innerHTML = html;
-    return template.content.firstChild;
-  }
-
-  function findPath(url) {
-    return (chrome && chrome.extension) ? chrome.extension.getURL(url) : url;
-  }
-
-  function strContains(word, keywords) {
-    return word.toLowerCase().indexOf(keywords.toLowerCase()) > -1;
-  }
 
   function scrollToTop() {
     document.getElementById('__tcmd-list').scrollTop = 0;
