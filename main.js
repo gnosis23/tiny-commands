@@ -4,11 +4,12 @@
   // Type declarations
   // ========================================
   class Command {
-    constructor(name, value, type) {
+    constructor(name, value, type, handler) {
       this.name = name;
       this.value = value;
       this.type = type;
       this.id = 0;
+      this.handler = handler;
     }
   };
   class CommandList {
@@ -29,6 +30,9 @@
     }
     selectPrev() {
       if (this.ptr > 0) this.ptr = this.ptr - 1;
+    }
+    selected() {
+      return this.commands.length === 0 ? null : this.commands[this.ptr];
     }
   }
 
@@ -62,11 +66,17 @@
     const list = new CommandList();
       
     [].forEach.call(currentTabs, function (tab) {
-      list.add(new Command(tab.title, "", "tab"))
+      const handler = () => {
+        chrome.runtime.sendMessage({ id: "gotoTab", tab: tab });
+      }
+      list.add(new Command(tab.title, "", "tab", handler))
     });
 
     KEY_LIST.filter(x => strContains(x.name, keywords)).forEach((key) => {
-      list.add(new Command(key.name, key.key, "key"));
+      const handler = () => {
+        chrome.runtime.sendMessage({ id: key.id });
+      }
+      list.add(new Command(key.name, key.key, "key", handler));
     });
     
     return list;
@@ -101,6 +111,10 @@
 
     input.addEventListener('keyup', (event) => {      
       if (event.key === "F2") return;
+      else if (event.key === "Enter") {
+        const cmd = commandList.selected();
+        cmd.handler();
+      }
       else if (event.key === "ArrowUp") {
         commandList.selectPrev();        
       }
