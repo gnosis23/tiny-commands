@@ -125,6 +125,12 @@
       list.add(new Command(bookmark.title, bookmark.url, "bookmark", handler));
     });
 
+    // search
+    list.add(new Command(`Search in Google: ${keywords}`, `https://www.google.com/search?q=${keywords}`, "Google", 
+      () => {
+      chrome.runtime.sendMessage({ id: "openBookmark", url: `https://www.google.com/search?q=${keywords}` });
+    }));
+
     return list;
   }
 
@@ -207,7 +213,8 @@
     const doRender = [
       tabRender(commandList.type("tab"), commandList.ptr, tabs),
       keyRender(commandList.type("key"), commandList.ptr),
-      bookmarkRender(commandList.type("bookmark"), commandList.ptr)
+      bookmarkRender(commandList.type("bookmark"), commandList.ptr),
+      searchRender(commandList.type("Google"), commandList.ptr)
     ].filter(x => x !== null);
 
     doRender.forEach((result) => {
@@ -296,6 +303,30 @@
         </a>`;
     });
 
+    function clickListener(elem, index) {
+      elem.addEventListener('click', () => {
+        chrome.runtime.sendMessage({ id: 'openBookmark', url: commandList[index].value})
+      });
+    }
+
+    return {
+      template: list,
+      selector: `.${selector}`,
+      listener: clickListener
+    }
+  }
+
+  function searchRender(commandList, ptr) {
+    let list = "";
+    const selector = '__tcmd-search';
+    list += `<p>搜索</p>`;
+
+    list +=
+      `<a class="__tcmd-cmd ${selector} ${commandList[0].id === ptr ? '__tcmd_selected' : '' }">
+          <span class="__tcmd-cmd-name">${commandList[0].name}</span>
+          <span class="__tcmd-cmd-value">${commandList[0].value}</span>      
+      </a>`;
+    
     function clickListener(elem, index) {
       elem.addEventListener('click', () => {
         chrome.runtime.sendMessage({ id: 'openBookmark', url: commandList[index].value})
