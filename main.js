@@ -122,7 +122,6 @@
       }
       list.add(new Command(bookmark.title, bookmark.url, "bookmark", handler));
     });
-    console.log(bookmarks);
 
     return list;
   }
@@ -145,20 +144,20 @@
     });
 
     input.addEventListener('keyup', (event) => {      
-      if (event.key === "F2") return;
-      else if (event.key === "Enter") {
-        const cmd = commandList.selected();
-        cmd.handler();
-        hideCommander();
-      }
-      else if (event.key === "ArrowUp") {
-        commandList.selectPrev();        
-      }
-      else if (event.key === "ArrowDown") {
-        commandList.selectNext();        
-      }
-      else {
-        commandList = setupCommandList(tabs, input.value);        
+      switch (event.key) {
+        case "F2":
+          return;
+        case "Enter":
+          const cmd = commandList.selected();
+          cmd.handler();
+          hideCommander();
+          break;
+        case "ArrowUp":
+          commandList.selectPrev(); break;
+        case "ArrowDown":
+          commandList.selectNext(); break;
+        default:
+          break;
       }
       render(commandList, tabs, input.value);
       scrollIfNeed();
