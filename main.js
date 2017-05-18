@@ -94,6 +94,32 @@
     rootElement.classList.toggle('__tcmd_hide');
   }
 
+  function createTextNode(text) {
+    const elem = document.createElement("p");
+    elem.innerText = text;
+    return elem;
+  }
+
+  function createCommandNode(text, value, selected) {
+    /** 
+     * <a class="__tcmd-cmd __tcmd-tab ${tab.id === ptr ? '__tcmd_selected' : '' }">
+     *   <span class="__tcmd-cmd-name">${tab.name}</span>        
+     * </a>
+     */
+    const parent = document.createElement("a");
+    parent.classList.add("__tcmd-cmd");
+    if (selected) parent.classList.add("__tcmd_selected");
+    const name = document.createElement("span");
+    name.classList.add("__tcmd-cmd-name");
+    name.innerText = text;
+    parent.appendChild(name);
+    const value0 = document.createElement("span");
+    value0.classList.add("__tcmd-cmd-value");
+    value0.innerText = value;
+    parent.appendChild(value0);
+    return parent;
+  }
+
   // ========================================
   // implementations
   // ========================================
@@ -217,17 +243,12 @@
       searchRender(commandList.type("Google"), commandList.ptr)
     ].filter(x => x !== null);
 
-    doRender.forEach((result) => {
-      list += result.template;
-    });
-    const cmdList = document.getElementById('__tcmd-list');
-    cmdList.innerHTML = list;
 
+    const cmdList = document.getElementById('__tcmd-list');
+    cmdList.innerHTML = '';
     doRender.forEach((result) => {
-      document.querySelectorAll(result.selector).forEach((elem, index) => {
-        result.listener(elem, index);
-      })
-    })
+      result.forEach((node) => { cmdList.appendChild(node) });
+    });
   }
 
   function tabRender(commandList, ptr, currentTabs) {
@@ -235,27 +256,16 @@
       return null;
     }
 
-    let list = "";
-    list += `<p>标签</p>`;
+    let list = [];
+    list.push(createTextNode("标签"));
 
-    [].forEach.call(commandList, function (tab) {
-      list +=
-        `<a class="__tcmd-cmd __tcmd-tab ${tab.id === ptr ? '__tcmd_selected' : '' }">
-          <span class="__tcmd-cmd-name">${tab.name}</span>        
-        </a>`
-    });
+    commandList.forEach(function (tab) {
+      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
+      node.addEventListener('click', tab.handler);
+      list.push(node);
+    });    
 
-    function clickListener(elem, index) {
-      elem.addEventListener('click', () => {
-        chrome.runtime.sendMessage({ id: "gotoTab", tab: currentTabs[index] });
-      });
-    }
-
-    return {
-      template: list,
-      selector: ".__tcmd-tab",
-      listener: clickListener
-    }
+    return list;
   }
 
   function keyRender(commandList, ptr) {
@@ -263,80 +273,45 @@
       return null;
     }
 
-    let list = "";
-    const selector = '__tcmd-command';
-    list += '<p>命令</p>';
+    let list = [];
+    list.push(createTextNode("命令"));
 
-    commandList.forEach((cmd, index) => {
-      list +=
-        `<a class="__tcmd-cmd ${selector} ${cmd.id === ptr ? '__tcmd_selected' : '' }">
-          <span class="__tcmd-cmd-name">${commandList[index].name}</span>
-          <span class="__tcmd-cmd-value">${commandList[index].value}</span>      
-        </a>`;
-    });
+    commandList.forEach(function (tab) {
+      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
+      node.addEventListener('click', tab.handler);
+      list.push(node);
+    });    
 
-    function clickListener(elem, index) {
-      elem.addEventListener('click', () => {
-        chrome.runtime.sendMessage({ id: commandList[index].id });
-      });
-    }
-
-    return {
-      template: list,
-      selector: `.${selector}`,
-      listener: clickListener
-    }
+    return list;
   }
 
   function bookmarkRender(commandList, ptr) {
     if (commandList.length === 0) return null;
 
-    let list = "";
-    const selector = '__tcmd-bookmark';
-    list += `<p>书签</p>`;
+    let list = [];
+    list.push(createTextNode("书签"));
 
-    commandList.forEach((bookmark, index) => {
-      list += 
-        `<a class="__tcmd-cmd ${selector} ${bookmark.id === ptr ? '__tcmd_selected' : '' }">
-          <span class="__tcmd-cmd-name">${commandList[index].name}</span>
-          <span class="__tcmd-cmd-value">${commandList[index].value}</span>      
-        </a>`;
-    });
+    commandList.forEach(function (tab) {
+      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
+      node.addEventListener('click', tab.handler);
+      list.push(node);
+    });    
 
-    function clickListener(elem, index) {
-      elem.addEventListener('click', () => {
-        chrome.runtime.sendMessage({ id: 'openBookmark', url: commandList[index].value})
-      });
-    }
-
-    return {
-      template: list,
-      selector: `.${selector}`,
-      listener: clickListener
-    }
+    return list;
   }
 
   function searchRender(commandList, ptr) {
-    let list = "";
-    const selector = '__tcmd-search';
-    list += `<p>搜索</p>`;
+    if (commandList.length === 0) return null;
 
-    list +=
-      `<a class="__tcmd-cmd ${selector} ${commandList[0].id === ptr ? '__tcmd_selected' : '' }">
-          <span class="__tcmd-cmd-name">${commandList[0].name}</span>
-          <span class="__tcmd-cmd-value">${commandList[0].value}</span>      
-      </a>`;
+    let list = [];
+    list.push(createTextNode("搜索"));
     
-    function clickListener(elem, index) {
-      elem.addEventListener('click', () => {
-        chrome.runtime.sendMessage({ id: 'openBookmark', url: commandList[index].value})
-      });
-    }
+    commandList.forEach(function (tab) {
+      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
+      node.addEventListener('click', tab.handler);
+      list.push(node);
+    });    
 
-    return {
-      template: list,
-      selector: `.${selector}`,
-      listener: clickListener
-    }
+    return list;
   }
 })();
