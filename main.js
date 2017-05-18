@@ -148,7 +148,7 @@
     input.addEventListener('keyup', (event) => {      
       switch (event.key) {
         case "F2":
-          break;
+          return;
         case "Enter":
           const cmd = commandList.selected();
           cmd.handler();
@@ -159,6 +159,7 @@
         case "ArrowDown":
           commandList.selectNext(); break;
         default:
+          commandList = setupCommandList(tabs, input.value);
           break;
       }
       render(commandList, tabs, input.value);
