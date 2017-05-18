@@ -46,6 +46,7 @@
   ];
   let tabs = [];
   let bookmarks = [];
+  let histories = [];
   const rootElement = await getRoot();
   let commandList = null;
 
@@ -55,6 +56,7 @@
   document.body.appendChild(rootElement);
   getTabs();
   getBookmarks();
+  getHistories();
   bindKeysAndRender();
 
   // ========================================
@@ -146,7 +148,7 @@
     input.addEventListener('keyup', (event) => {      
       switch (event.key) {
         case "F2":
-          return;
+          break;
         case "Enter":
           const cmd = commandList.selected();
           cmd.handler();
@@ -173,6 +175,12 @@
   function getBookmarks() {
     chrome.runtime.sendMessage({ id: "bookmarks" }, function (response) {      
       bookmarks = (response.bookmarks);
+    });
+  }
+
+  function getHistories() {
+    chrome.runtime.sendMessage({ id: "histories" }, function (response) {      
+      histories = (response.histories);
     });
   }
 

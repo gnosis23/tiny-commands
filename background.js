@@ -5,6 +5,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       listTabs(sendResponse); break;
     case "bookmarks":
       listBookmarks(sendResponse); break;
+    case "histories":
+      listHistories(sendResponse); break;
     case "openBookmark":
       openBookmark(request.url);
     case "gotoTab":
@@ -28,6 +30,12 @@ function listTabs(dispatcher) {
 function listBookmarks(dispatcher) {
   chrome.bookmarks.getTree(function (treeNodes) {
     dispatcher({ bookmarks: treeToList(treeNodes[0]) });
+  })
+}
+
+function listHistories(dispatcher) {
+  chrome.history.search({text: ""}, function (items) {
+    dispatcher({ histories: items });
   })
 }
 
