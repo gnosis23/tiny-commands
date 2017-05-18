@@ -237,12 +237,11 @@
   function render(commandList, currentTabs, keywords) {
     let list = "";
     const doRender = [
-      tabRender(commandList.type("tab"), commandList.ptr, tabs),
-      keyRender(commandList.type("key"), commandList.ptr),
-      bookmarkRender(commandList.type("bookmark"), commandList.ptr),
-      searchRender(commandList.type("Google"), commandList.ptr)
+      commonRender(commandList.type("tab"), commandList.ptr, "Current Tab"),
+      commonRender(commandList.type("key"), commandList.ptr, "Key Bindings"),
+      commonRender(commandList.type("bookmark"), commandList.ptr, "Bookmarks"),
+      commonRender(commandList.type("Google"), commandList.ptr, "Search")
     ].filter(x => x !== null);
-
 
     const cmdList = document.getElementById('__tcmd-list');
     cmdList.innerHTML = '';
@@ -251,67 +250,18 @@
     });
   }
 
-  function tabRender(commandList, ptr, currentTabs) {
-    if (commandList.length === 0) {
-      return null;
-    }
-
-    let list = [];
-    list.push(createTextNode("标签"));
-
-    commandList.forEach(function (tab) {
-      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
-      node.addEventListener('click', tab.handler);
-      list.push(node);
-    });    
-
-    return list;
-  }
-
-  function keyRender(commandList, ptr) {
-    if (commandList.length === 0) {
-      return null;
-    }
-
-    let list = [];
-    list.push(createTextNode("命令"));
-
-    commandList.forEach(function (tab) {
-      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
-      node.addEventListener('click', tab.handler);
-      list.push(node);
-    });    
-
-    return list;
-  }
-
-  function bookmarkRender(commandList, ptr) {
+  function commonRender(commandList, currentPtr, title) {
     if (commandList.length === 0) return null;
 
     let list = [];
-    list.push(createTextNode("书签"));
-
-    commandList.forEach(function (tab) {
-      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
-      node.addEventListener('click', tab.handler);
-      list.push(node);
-    });    
-
-    return list;
-  }
-
-  function searchRender(commandList, ptr) {
-    if (commandList.length === 0) return null;
-
-    let list = [];
-    list.push(createTextNode("搜索"));
+    list.push(createTextNode(title));
     
-    commandList.forEach(function (tab) {
-      const node = createCommandNode(tab.name, tab.value, tab.id === ptr);
-      node.addEventListener('click', tab.handler);
+    commandList.forEach(function (cmd) {
+      const node = createCommandNode(cmd.name, cmd.value, cmd.id === currentPtr);
+      node.addEventListener('click', cmd.handler);
       list.push(node);
     });    
 
-    return list;
+    return list;    
   }
 })();
